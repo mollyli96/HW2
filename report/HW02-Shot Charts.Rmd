@@ -1,0 +1,177 @@
+---
+title: "HW02 - Shot Charts"
+author: "Molly Li"
+date: "3/6/2018"
+output: github_document
+---
+#5) Summary Tables (20 pts)
+
+```{r setuo, include=FALSE}
+knitr::opts_chunk$set(echo = T, fig.path = "/images/")
+```
+
+```{r}
+#load 
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(tibble)
+library("jpeg")
+library("grid")
+```
+
+```{r}
+#read data
+curry <- read.csv("../data/stephen-curry.csv", stringsAsFactors = FALSE)
+thompson <- read.csv("../data/klay-thompson.csv", stringsAsFactors = FALSE)
+durant <- read.csv("../data/kevin-durant.csv", stringsAsFactors = FALSE)
+green <- read.csv("../data/draymond-green.csv", stringsAsFactors = FALSE)
+iguodala <- read.csv("../data/andre-iguodala.csv", stringsAsFactors = FALSE)
+
+
+```
+
+##5.1) Total Shots by Player (10 pts)
+Total number of shots (2PT and 3PT, both made and missed) by player, arranged in descending order. This tibble should have the format depicted in the diagram below.
+```{r}
+curry$name <- c('Stephen Curry')
+thompson$name <- c('Klay Thompson')
+durant$name <- c('Kevin Durant')
+green$name <- c('Draymond Green')
+iguodala$name <- c('Andre Iguodala')
+igdtc <- rbind(iguodala,green,durant,thompson,curry)
+total_shot <- arrange(
+  summarise(
+    group_by(igdtc,name),
+    total=n()),
+  desc(total)
+)
+total_shot
+```
+
+##5.2) Effective Shooting Percentage (10 pts)
+Create the three tables listed below to summarize Effective Shooting percentages by player. All three tibbles should have the format of the following depicted diagram:
+
+Effective Shooting % by Player: Overall (i.e. including 2PT and 3PT Field Goals) effective shooting percentage by player, arranged in descending order by percentage.
+```{r}
+by_name <- group_by(igdtc,name)
+by_made <- filter(igdtc, shot_made_flag =="made shot")
+df1 <- summarise(by_name,
+                 total=n())
+df2 <- summarise(
+  group_by(by_made, name),
+  made = length(shot_made_flag))
+effective_shooting1 <- 
+  arrange(mutate(merge(df1,df2),prec_made=(made/total)*100),desc(prec_made))
+effective_shooting1
+```
+2PT Effective Shooting % by Player: 2 PT Field Goal effective shooting percentage by player, arranged in descending order by percentage.
+```{r}
+df1 <- summarise(by_name,
+                 total=n())
+df1
+```
+
+```{r}
+by_type2 <- filter(igdtc,shot_type=="2PT Field Goal")
+by_made2 <- filter(igdtc, shot_made_flag =="made shot" & shot_type=="2PT Field Goal")
+by_name2 <- group_by(by_type2, name)
+
+df1 <- summarise(by_name2,
+                 total=n())
+df2 <- summarise(
+  group_by(by_made2, name),
+  made = length(shot_made_flag))
+effective_shooting2 <- 
+  arrange(mutate(merge(df1,df2),prec_made=(made/total)),desc(prec_made))
+effective_shooting2
+```
+
+3PT Effective Shooting % by Player: 3 PT Field Goal effective shooting percentage by player, arranged in descending order by percentage.
+```{r}
+by_type3 <- filter(igdtc,shot_type=="3PT Field Goal")
+by_made3 <- filter(igdtc, shot_made_flag =="made shot" & shot_type=="3PT Field Goal")
+by_name3 <- group_by(by_type3,name)
+
+df1 <- summarise(by_name3,
+                 three_pt_total=n())
+df2 <- summarise(
+  group_by(by_made3, name),
+  made = length(shot_made_flag))
+effective_shooting3 <- 
+  arrange(mutate(merge(df1,df2),prec_made=(made/three_pt_total)),desc(prec_made))
+effective_shooting3
+
+```
+
+#6) Shooting Distance (20 pts)
+Consider the following question: the shorter the shooting distance, the higher the chance to successfully make a shot? Intuition and experience will suggest that YES. To confirm this, you will have to calculate, for each distance value, the proportion of made shots.
+
+
+##6.1) dplyr table (10 pts)
+More precisely, use dplyr operations to obtain a tibble with two columns: shot_distance and made_shot_prop. The first row of the tibble should contain the value of distance = 0 ft, and the associated proportion of made shots (of all the five analyzed players). The second row should contain the value of distance = 1 ft, and the corresponding proportion of made shots; and so on.
+
+
+```{r}
+shots_dis <- igdtc %>%
+  group_by(shot_distance) %>%
+  select(shot_distance, shot_made_flag) %>%
+  summarise(
+  total_shots=n(),
+  made_shot=sum(shot_made_flag=="made shot")) %>%
+mutate(prop_made= made_shot/total_shots)
+shots_dis
+```
+
+
+
+
+##6.2) ggplot (10 pts)
+With the tibble created in 6.1), use ggplot() to make a scatterplot with the variables shot_distance and made_shot_prop. Use the x-axis for the shot distance, and the y-axis for the proportion of made shots.
+```{r}
+ggplot(data = shots_dis, aes(x = shot_distance, y = prop_made)) +
+  geom_point(alpha = 0.7) 
+```
+
+• What do you observe?
+I observe the relationship between shot distance and prop made.
+
+• Can you confirm that the shorter the distance, the more effective the shots?
+When the distance is shorter than 8 ft, it shows that the shorter the distance, the more effective the shots. However,when the distance is greater than 8 ft, we lost this trait.
+
+• Can you guesstimate a distance threshold beyond which the chance of making a
+successful shot is basically null?
+When the distance greater than 38ft and above, the chance of making a
+successful shot is basically null
+
+• What distances tend to have a percentage (of making a shot) of 50% or more?
+There are some points from 0-30 ft tend to have a percentage (of making a shot) of 50% or more.
+
+
+#7) Total number of shots by minute of occurrence (10 pts)
+The last part of the assignment involves looking at the total number of shots (made and missed) by minute of occurrence.
+
+The following graph—just for illustration purposes—depicts Stephen Curry’s total number of shots (by minute of occurrence). The background of the plot has been adapted to reflect the four periods, each of 12 minutes. Notice how Curry’s shot activity peaks at the end of each period. Likewise, we can observe that Stephen Curry tends to rest at the begining of the second and fourth periods.
+
+Create a facetted graph of the total number of shots by minute of occurrence, depicting a facet per player, similar to the plot below. Try to write code that produce a plot as similar as possible.
+
+You may need to use the following functions: scale_x_continuous() to modify scale of x-axis, geom_rect() to add background rectangles, geom_path() to connect the dots, theme_minimal() to get a minimal theme.
+
+```{r}
+igdtc %>%
+  select(player,minute) %>%
+  group_by(player, minute) %>%
+  summarise(count=n()) %>%
+  geom_point()+
+  ylab("total number of shots")+
+  scale_x_continuous(limits = c(0,48),breaks = c(1,12,24,36,48))+
+  scale_y_continuous(limits = c(0,70))+
+  geom_path()=
+  geom_rect(alpha =0.008, aes(x = minute, y = count, xmin=0, xmax=12,ymin=-Inf,ymax=Inf), fill="black")+
+    geom_rect(alpha =0.008, aes(x = minute, y = count, xmin=24, xmax=36,ymin=-Inf,ymax=Inf), fill="black")+
+  ggtitle("Total Number of shots")+
+  
+  theme_minimal()+
+  facet_wrap(~player)
+```
+

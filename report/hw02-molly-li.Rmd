@@ -1,0 +1,54 @@
+---
+title: "hw02-molly-li"
+author: "Molly Li"
+date: "3/3/2018"
+output: html_document
+---
+
+# 2) Data (10 pts)
+```{r}
+download.file("https://raw.githubusercontent.com/ucb-stat133/stat133-spring-2018/master/data/draymond-green.csv",  '/Users/XuewenLi/desktop/133/hw02/data/draymond-green.csv')
+
+download.file("https://raw.githubusercontent.com/ucb-stat133/stat133-spring-2018/master/data/andre-iguodala.csv",  '/Users/XuewenLi/desktop/133/hw02/data/andre-iguodala.csv')
+
+download.file("https://raw.githubusercontent.com/ucb-stat133/stat133-spring-2018/master/data/kevin-durant.csv",  '/Users/XuewenLi/desktop/133/hw02/data/kevin-durant.csv')
+
+download.file("https://raw.githubusercontent.com/ucb-stat133/stat133-spring-2018/master/data/klay-thompson.csv",  '/Users/XuewenLi/desktop/133/hw02/data/klay-thompson.csv')
+
+download.file("https://raw.githubusercontent.com/ucb-stat133/stat133-spring-2018/master/data/stephen-curry.csv",  '/Users/XuewenLi/desktop/133/hw02/data/stephen-curry.csv')
+
+```
+
+
+```{r}
+library(readr)
+curry <- read.csv("/Users/XuewenLi/desktop/133/hw02/data/stephen-curry.csv", stringsAsFactors = FALSE)
+thompson <- read.csv("/Users/XuewenLi/desktop/133/hw02/data/stephen-curry.csv", stringsAsFactors = FALSE)
+durant <- read.csv("/Users/XuewenLi/desktop/133/hw02/data/kevin-durant.csv", stringsAsFactors = FALSE)
+green <- read.csv("/Users/XuewenLi/desktop/133/hw02/data/draymond-green.csv", stringsAsFactors = FALSE)
+iguodala <- read.csv("/Users/XuewenLi/desktop/133/hw02/data/andre-iguodala.csv", stringsAsFactors = FALSE)
+```
+
+
+## 2.1) Download the data
+Done
+
+## 2.2) Data Dictionary (10 pts)
+Done
+
+## 3) Data Preparation (20 pts)
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tibble)
+```
+
+```{r}
+iguodala <- mutate(iguodala, name == "Andre Iguodala")
+curry <- mutate(curry, name == "Stephen Curry")
+
+
+```
+
+
+
